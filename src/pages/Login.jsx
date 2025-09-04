@@ -91,10 +91,10 @@ function Login() {
         </button>
 
         <div className="flex justify-between text-sm mt-3">
-          <a href="/signup" className="text-blue-600">
+          <a href={`${CONFIG.BASENAME}/signup`} className="text-blue-600">
             Sign Up
           </a>
-          <a href="/forgot-password" className="text-blue-600">
+          <a href={`${CONFIG.BASENAME}/forgot-password`} className="text-blue-600">
             Forgot Password?
           </a>
         </div>
