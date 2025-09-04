@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/slices/authSlice";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import CONFIG from "../constants/config";
+  import { useNavigate } from "react-router-dom";
+  import axios from "axios";
+  import CONFIG from "../constants/config";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -22,7 +22,8 @@ function Login() {
       const res = await axios.post(`${CONFIG.BASE_URL}/api/auth/login`, {
         email,
         password,
-      });
+      }                               
+    );
     //   console.log(res.data.data);
       if (res.data.data?.token) {
         // Save to Redux

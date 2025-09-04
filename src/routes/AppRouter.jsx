@@ -10,7 +10,7 @@ import Account from "../pages/Account";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import FacebookAccounts from "../pages/FacebookAccounts";
-
+import ResetPassword from "../pages/ResetPassword";
 function AppRouter() {
   return (
     <Routes>
@@ -19,6 +19,7 @@ function AppRouter() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected layout with sidebar & topbar */}
       <Route
