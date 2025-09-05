@@ -4,7 +4,7 @@ import { loginSuccess } from "../redux/slices/authSlice";
   import { useNavigate } from "react-router-dom";
   import axios from "axios";
   import CONFIG from "../constants/config";
-
+import { Link } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,12 +91,14 @@ function Login() {
         </button>
 
         <div className="flex justify-between text-sm mt-3">
-          <a href="/signup" className="text-blue-600">
+           <Link to="/signup"  className="text-blue-600">
             Sign Up
-          </a>
-          <a href="/forgot-password" className="text-blue-600">
-            Forgot Password?
-          </a>
+            </Link>
+          
+           <Link to="/forgot-password" className="text-blue-600">
+           Forgot Password?
+           </Link> 
+          
         </div>
       </form>
     </div>
