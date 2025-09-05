@@ -9,7 +9,7 @@ import "./index.css"; // Tailwind
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Provider store={store}>
-    <BrowserRouter basename="/fb-ghl-front">
+    <BrowserRouter >
     {/* <BrowserRouter basename="http://localhost:5173"> */}
       <App />
     </BrowserRouter> 
