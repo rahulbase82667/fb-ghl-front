@@ -19,6 +19,6 @@ export default defineConfig({
     outDir: 'dist', // ✅ ensure build output goes to dist
   },
   server: {
-    port: 3000, // optional, just for local dev
+    port: 5173, // optional, just for local dev
   },
 })
