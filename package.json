@@ -1,7 +1,7 @@
 {
   "name": "fb-ghl-frontend",
   "private": true,
-  "homepage": "https://fb-ghl-front.onrender.com",
+
   "version": "0.0.0",
   "type": "module",
   "scripts": {
