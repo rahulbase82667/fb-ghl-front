@@ -1,7 +1,7 @@
 {
   "name": "fb-ghl-frontend",
   "private": true,
-  "homepage": "https://rahulbase82667.github.io/fb-ghl-front",
+  "homepage": "https://fb-ghl-front.onrender.com",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
