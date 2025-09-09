@@ -1,7 +1,6 @@
 {
   "name": "fb-ghl-frontend",
   "private": true,
-
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -15,6 +14,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.9.0",
     "axios": "^1.11.0",
+    "lucide-react": "^0.542.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-redux": "^9.2.0",
