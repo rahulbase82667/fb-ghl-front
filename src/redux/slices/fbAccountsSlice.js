@@ -7,7 +7,7 @@ export const fetchFBAccounts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/api/facebook/accounts");
-      console.log(res.data.accounts);
+      // console.log(res.data.accounts);
       return res.data.accounts;
     } catch (err) {
       return rejectWithValue(err.response?.data?.error || "Failed to load accounts");
@@ -20,10 +20,24 @@ export const addFBAccount = createAsyncThunk(
   "fbAccounts/addFBAccount",
   async (accountData, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post("/api/facebook/accounts", accountData);
+      const res = await axiosInstance.post("/api/facebook/add", accountData);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to add account");
+    }
+  }
+);
+// Upload multiple accounts via CSV/Excel
+export const uploadFBAccounts = createAsyncThunk(
+  "fbAccounts/uploadFBAccounts",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/api/facebook/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data; // contains insertedCount + insertedIds
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to upload accounts");
     }
   }
 );
@@ -33,7 +47,7 @@ export const removeFBAccount = createAsyncThunk(
   "fbAccounts/removeFBAccount",
   async (id, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/api/fb/accounts/${id}`);
+      await axiosInstance.delete(`/api/facebook/${id}`);
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to remove account");
@@ -79,7 +93,18 @@ const fbAccountsSlice = createSlice({
       })
       .addCase(removeFBAccount.rejected, (state, action) => {
         state.error = action.payload;
+      })
+      .addCase(uploadFBAccounts.fulfilled, (state, action) => {
+        // Option A: trigger refetch after upload → simplest & always in sync
+        // do nothing here, frontend should dispatch(fetchFBAccounts()) after success
+
+        // Option B: optimistic update (if backend returns inserted accounts directly)
+        // state.accounts = [...state.accounts, ...action.payload.accounts];
+      })
+      .addCase(uploadFBAccounts.rejected, (state, action) => {
+        state.error = action.payload;
       });
+
   },
 });
 

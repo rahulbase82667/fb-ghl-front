@@ -22,7 +22,7 @@ function AppRouter() {
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected layout with sidebar & topbar */}
-      <Route
+      <Route 
         path="/*"
         element={
           <PrivateRoute>

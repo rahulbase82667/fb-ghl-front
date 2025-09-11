@@ -72,7 +72,7 @@ function Topbar() {
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-500 active:scale-95 transition-all"
+        className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
       >
         <LogOut size={18} />
         <span className="hidden sm:inline">Logout</span>

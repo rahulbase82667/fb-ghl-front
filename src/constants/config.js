@@ -3,6 +3,7 @@
 const CONFIG = {
   // BASE_URL: "http://localhost:3000", // your backend base URL
   BASE_URL: "https://fb-g-h-l-integration.onrender.com", // your backend base URL
+
   BASENAME:"/fb-ghl-front",
 
   // Token key for localStorage
