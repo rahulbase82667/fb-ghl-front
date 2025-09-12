@@ -11,6 +11,8 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import FacebookAccounts from "../pages/FacebookAccounts";
 import ResetPassword from "../pages/ResetPassword";
+import FBChat from "../pages/FBChat";
+
 function AppRouter() {
   return (
     <Routes>
@@ -36,6 +38,7 @@ function AppRouter() {
                     <Route path="settings" element={<Settings />} />  
                     <Route path="account" element={<Account />} />
                     <Route path="facebook-accounts" element={<FacebookAccounts />} />
+                    <Route path="fb/:id" element={<FBChat />} />
 
                   </Routes>
                 </div>

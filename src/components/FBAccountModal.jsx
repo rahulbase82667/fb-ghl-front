@@ -35,7 +35,7 @@ function FBAccountModal({ onClose }) {
 
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to add account");
+      setError(err || "Failed to add account");
     } finally {
       setLoading(false);
     }

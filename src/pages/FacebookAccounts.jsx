@@ -6,7 +6,7 @@ import {
 } from "../redux/slices/fbAccountsSlice";
 import FBAccountModal from "../components/FBAccountModal";
 import FBUploadModal from "../components/FBUploadModal";
-
+import {Link} from "react-router-dom";
 import { Trash2, Plus } from "lucide-react";
 
 function FacebookAccounts() {
@@ -14,7 +14,7 @@ function FacebookAccounts() {
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
-    const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
 
   useEffect(() => {
@@ -24,11 +24,11 @@ function FacebookAccounts() {
   return (
     <div className="p-6 text-gray-200 bg-gray-700">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6"> 
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-green-400">
           Facebook Accounts
         </h2>
-         <div className="flex gap-3">
+        <div className="flex gap-3">
           <button
             onClick={() => setShowUploadModal(true)}
             className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-black"
@@ -64,13 +64,15 @@ function FacebookAccounts() {
               <p className="font-semibold text-white"><span className="text-green-700">Proxy User:</span> {acc.proxy_user || 'No Proxy User'}</p>
               <p className="font-semibold text-white"><span className="text-green-700">Proxy Port:</span> {acc.proxy_port || 'N/A'}</p>
               <p className="font-semibold text-white"><span className="text-green-700">Login Status:</span> {acc.login_status}</p>
-
-              {acc.proxy && (
-                <p className="text-sm text-gray-400">
-                  Proxy: {acc.proxy_url}
-                </p>
-              )}
             </div>
+            
+              <Link to={`/fb/${acc.id}`} >
+              <button className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
+              >
+                View Chats
+              </button>
+              </Link>
+           
             <button
               onClick={() => dispatch(removeFBAccount(acc.id))}
               className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
