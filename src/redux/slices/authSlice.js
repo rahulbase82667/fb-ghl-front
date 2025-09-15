@@ -17,12 +17,12 @@ const authSlice = createSlice({
     loginSuccess: (state, action) => {
       state.token = action.payload.token;
       state.user = action.payload.user;
-
       // Persist in localStorage
       localStorage.setItem(CONFIG.TOKEN_KEY, action.payload.token);
       localStorage.setItem("user", JSON.stringify(action.payload.user));
     },
     logout: (state) => {
+                                                          
       state.token = null;
       state.user = null;
       localStorage.removeItem(CONFIG.TOKEN_KEY);

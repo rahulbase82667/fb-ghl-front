@@ -64,17 +64,26 @@ function FBChat() {
                 {loading && <p className="p-3 text-gray-400">Loading...</p>}
                 {error && <p className="p-3 text-red-400">{error}</p>}
 
-                {conversations.length > 0 && conversations.map((conv) => (
-                    <div
-                        key={conv.id}
-                        onClick={() => handleConversationClick(conv)}
-                        className={`px-3 py-2 cursor-pointer hover:bg-gray-700 ${activeConversation?.id === conv.id ? "bg-gray-700" : ""
-                            }`}
-                    >
-                        <p className="font-semibold">{conv.chat_partner}</p>
-                       
-                    </div>
-                )) || <p className="p-3 text-gray-400">No conversations yet.</p>}
+                {conversations.length > 0 ? (
+                    conversations
+                        .filter(
+                            (conv) =>
+                                conv && conv.id !== null && conv.id !== undefined && conv.chat_partner
+                        )
+                        .map((conv) => (
+                            <div
+                                key={conv.id}
+                                onClick={() => handleConversationClick(conv)}
+                                className={`px-3 py-2 cursor-pointer hover:bg-gray-700 ${activeConversation?.id === conv.id ? "bg-gray-700" : ""
+                                    }`}
+                            >
+                                <p className="font-semibold">{conv.chat_partner}</p>
+                            </div>
+                        ))
+                ) : (
+                    <p className="p-3 text-gray-400">No conversations yet.</p>
+                )}
+
             </div>
 
             {/* Chat Window */}
@@ -104,12 +113,12 @@ function FBChat() {
                             >
                                 <div
                                     className={`px-3 py-2  break-words whitespace-pre-wrap rounded-lg max-w-xs ${msg.sender === "You"
-                                            ? "bg-green-600 text-white"
-                                            : "bg-gray-600 text-white"
-                                       }`}
+                                        ? "bg-green-600 text-white"
+                                        : "bg-gray-600 text-white"
+                                        }`}
                                 >
                                     <p>{msg.text}</p>
-                                    
+0
                                 </div>
                             </div>
                         ))
