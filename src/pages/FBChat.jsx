@@ -118,7 +118,6 @@ function FBChat() {
                                         }`}
                                 >
                                     <p>{msg.text}</p>
-0
                                 </div>
                             </div>
                         ))
