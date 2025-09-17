@@ -129,7 +129,7 @@ useEffect(() => {
   });
 
   socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-    addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
+    addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
   });
 
   socket.on("scrape-completed", ({ accountId }) => {
@@ -138,7 +138,7 @@ useEffect(() => {
 
   socket.on("scrape-failed", ({ accountId, error }) => {
     // alert('failed')
-    addLog(`Scraping failed for ${accountId}: ${error}`);
+    addLog(`Scraping failed for ${accountId}: ${error}` );
   });
 
   socket.on("login-started", ({ accountId }) => {

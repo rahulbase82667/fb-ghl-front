@@ -25,7 +25,7 @@ function Login() {
         email,
         password,
       });
-      console.log(res)
+      // console.log(res)
       if (res.data.data?.token) {
         dispatch(
           loginSuccess({
