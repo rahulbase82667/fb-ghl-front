@@ -28,7 +28,7 @@ function FacebookAccounts() {
   // Handle login
   // Handle login
   const handleLogin = async (accountId) => {
-     setLogsModalOpen(true)
+    setLogsModalOpen(true)
     // console.log(`${CONFIG.BASE_URL}api/facebook/login/${accountId}`);
     try {
       setScrapeStatus((prev) => ({
@@ -117,56 +117,59 @@ function FacebookAccounts() {
   //   };
   // }, []);
 
-useEffect(() => {
-  const addLog = (msg) =>
-    setLogs((prev) => [
-      ...prev,
-      { message: msg, timestamp: new Date().toLocaleTimeString() },
-    ]);
+  useEffect(() => {
+    const addLog = (msg) =>
+      setLogs((prev) => [
+        ...prev,
+        { message: msg, timestamp: new Date().toLocaleTimeString() },
+      ]);
 
-  socket.on("scrape-started", ({ accountId }) => {
-    addLog(`Scraping started for account ${accountId}`);
-  });
+    socket.on("scrape-started", ({ accountId }) => {
+      addLog(`Scraping started for account ${accountId}`);
+    });
 
-  socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-    addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
-  });
+    socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
+      addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
+    });
 
-  socket.on("scrape-completed", ({ accountId }) => {
-    addLog(`Scraping completed for account ${accountId}`);
-  });
+    socket.on("scrape-completed", ({ accountId }) => {
+      addLog(`Scraping completed for account ${accountId}`);
+      setLogsModalOpen(false)
+    });
 
-  socket.on("scrape-failed", ({ accountId, error }) => {
-    // alert('failed')
-    addLog(`Scraping failed for ${accountId}: ${error}` );
-  });
+    socket.on("scrape-failed", ({ accountId, error }) => {
+      // alert('failed')
+      addLog(`Scraping failed for ${accountId}: ${error}`);
+    });
 
-  socket.on("login-started", ({ accountId }) => {
-    addLog(`Login started for account ${accountId}`);
-  });
+    socket.on("login-started", ({ accountId }) => {
+      addLog(`Login started for account ${accountId}`);
+    });
 
-  socket.on("login-completed", ({ accountId }) => {
-    addLog(`Login successful for account ${accountId}`);
-  });
+    socket.on("login-completed", ({ accountId }) => {
+      dispatch(fetchFBAccounts());
+      addLog(`Login successful for account ${accountId}`);
+      setLogsModalOpen(false)
+    });
 
-  socket.on("login-failed", ({ accountId, error }) => {
-    addLog(`Login failed for ${accountId}: ${error}`);
-  });
+    socket.on("login-failed", ({ accountId, error }) => {
+      addLog(`Login failed for ${accountId}: ${error}`);
+    });
 
-  return () => {
-    socket.off("scrape-started");
-    socket.off("scrape-progress");
-    socket.off("scrape-completed");
-    socket.off("scrape-failed");
-    socket.off("login-started");
-    socket.off("login-completed");
-    socket.off("login-failed");
-  };
-}, []);
+    return () => {
+      socket.off("scrape-started");
+      socket.off("scrape-progress");
+      socket.off("scrape-completed");
+      socket.off("scrape-failed");
+      socket.off("login-started");
+      socket.off("login-completed");
+      socket.off("login-failed");
+    };
+  }, [dispatch]);
 
   // Start scraping handler
   const handleScrape = async (accountId) => {
-     setLogsModalOpen(true)
+    setLogsModalOpen(true)
     try {
       setScrapeStatus((prev) => ({
         ...prev,
@@ -268,11 +271,11 @@ useEffect(() => {
       {/* Modal */}
       {modalOpen && <FBAccountModal onClose={() => setModalOpen(false)} />}
       {showUploadModal && <FBUploadModal onClose={() => setShowUploadModal(false)} />}
-<LogsModal
-  isOpen={logsModalOpen}
-  onClose={() => setLogsModalOpen(false)}
-  logs={logs}
-/>
+      <LogsModal
+        isOpen={logsModalOpen}
+        onClose={() => setLogsModalOpen(false)}
+        logs={logs}
+      />
 
     </div>
 
