@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import CONFIG from "../constants/config";
 import axios from "axios";
+import { updateUser } from "../redux/slices/authSlice";
 
 function Account() {
   const dispatch = useDispatch();
@@ -94,18 +95,45 @@ function Account() {
     if (passwords.newPassword.length < 6) errors.newPassword = "Password must be at least 6 characters.";
     if (passwords.newPassword !== passwords.confirmPassword) {
       errors.confirmPassword = "Passwords do not match.";
-    }
+    } 
     return errors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async  (e) => {
     e.preventDefault();
     const errors = validateForm();
     setFormErrors(errors);
-
+    if(!window.confirm("Are you sure you wan to update your profile?")){
+      return 
+    }
     if (Object.keys(errors).length === 0) {
-      console.log("Updated Profile Data:", form);
-      alert("Profile updated (dummy for now).");
+      try {
+      const res = await axios.post(
+        `${CONFIG.BASE_URL}/api/auth/change-name`,
+        {
+          email: user.email,
+          name: form.name,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Name changed successfully.");
+              dispatch(updateUser({ name: form.name }));
+
+    } catch (err) {
+      if (err.response) {
+        console.log(err.response);
+        setApiError(err.response.data.error=="Validation failed"?err.response.data.details[0].message:err.response.data.error || "Something went wrong. Please try again.");
+      } else if (err.request) {
+        setApiError("No response from server. Check your connection.");
+      } else {
+        setApiError("An unexpected error occurred.");
+      }
+    } 
     }
   };
 

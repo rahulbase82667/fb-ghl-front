@@ -8,7 +8,7 @@ import FBAccountModal from "../components/FBAccountModal";
 import FBUploadModal from "../components/FBUploadModal";
 import { Link } from "react-router-dom";
 import { Trash2, Plus } from "lucide-react";
-import { socket } from "../socket"; // 👈 import socket
+import { connectSocket, disconnectSocket, getSocket } from "../socket";
 import axios from "axios";
 import CONFIG from "../constants/config";
 import LogsModal from "../components/LogsModal";
@@ -25,10 +25,16 @@ function FacebookAccounts() {
 
   // Track scrape status for each account
   const [scrapeStatus, setScrapeStatus] = useState({});
+    const [socketInstance, setSocketInstance] = useState(null);
+
   // Handle login
   // Handle login
   const handleLogin = async (accountId) => {
     setLogsModalOpen(true)
+    if (!socketInstance || !socketInstance.connected) {
+      const socket = connectSocket();
+      setSocketInstance(socket);
+    }
     // console.log(`${CONFIG.BASE_URL}api/facebook/login/${accountId}`);
     try {
       setScrapeStatus((prev) => ({
@@ -46,6 +52,9 @@ function FacebookAccounts() {
         ...prev,
         [accountId]: "📡 Login job enqueued...",
       }));
+
+
+      console.log(scrapeStatus);
     } catch (err) {
       console.error(err);
       setScrapeStatus((prev) => ({
@@ -55,69 +64,102 @@ function FacebookAccounts() {
     }
   };
 
+
+  // Start scraping handler
+  const handleScrape = async (accountId) => {
+    setLogsModalOpen(true)
+    if (!socketInstance || !socketInstance.connected) {
+      const socket = connectSocket();
+      setSocketInstance(socket);
+    }
+    try {
+      setScrapeStatus((prev) => ({
+        ...prev,
+        [accountId]: "⏳ Requesting scrape...",
+      }));
+
+      await axios.post(`http://localhost:3000/api/scrape/chats/${accountId}`);
+      //  setLogsModalOpen(false)
+
+      console.log(scrapeStatus);
+
+    } catch (err) {
+      setScrapeStatus((prev) => ({
+        ...prev,
+        [accountId]: "❌ Error starting scrape",
+      }));
+    }
+  };
+
   useEffect(() => {
     dispatch(fetchFBAccounts());
   }, [dispatch]);
-  // 🔌 Listen for socket events
+
+
   // useEffect(() => {
-  //   socket.on("scrape-started", ({ accountId }) => {
-  //     setScrapeStatus((prev) => ({
+  //   const addLog = (msg) =>
+  //     setLogs((prev) => [
   //       ...prev,
-  //       [accountId]: "Scraping started...",
-  //     }));
+  //       { message: msg, timestamp: new Date().toLocaleTimeString() },
+  //     ]);
+
+  //   socket.on("scrape-started", ({ accountId }) => {
+  //     addLog(`Scraping started for account ${accountId}`);
   //   });
 
   //   socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-  //     setScrapeStatus((prev) => ({
-  //       ...prev,
-  //       [accountId]: `📡 Scraping ${partner || "chat"} (${current}/${total})`,
-  //     }));
+  //     addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
   //   });
 
   //   socket.on("scrape-completed", ({ accountId }) => {
-  //     setScrapeStatus((prev) => ({
-  //       ...prev,
-  //       [accountId]: "✅ Scraping completed",
-  //     }));
+  //     addLog(`Scraping completed for account ${accountId}`);
+  //     setLogsModalOpen(false)
   //   });
 
   //   socket.on("scrape-failed", ({ accountId, error }) => {
-  //     setScrapeStatus((prev) => ({
-  //       ...prev,
-  //       [accountId]: `❌ Failed: ${error}`,
-  //     }));
-  //   });
-  //   socket.on("login-started", ({ accountId }) => {
-  //     setScrapeStatus((prev) => ({
-  //       ...prev,
-  //       [accountId]: "🔑 Login started...",
-  //     }));
+  //     // alert('failed')
+  //     addLog(`Scraping failed for ${accountId}: ${error}`);
   //   });
 
+  //   socket.on("login-started", ({ accountId }) => {
+  //     addLog(`Login started for account ${accountId}`);
+  //   });
+
+  //   // socket.on("login-completed", ({ accountId }) => {
+  //   //   dispatch(fetchFBAccounts());
+  //   //   addLog(`Login successful for account ${accountId}`);
+  //   //   setLogsModalOpen(false)
+  //   // });
   //   socket.on("login-completed", ({ accountId }) => {
-  //     setScrapeStatus((prev) => ({
+  //     addLog(`Login successful for account ${accountId}`);
+  //     setScrapeStatus(prev => ({
   //       ...prev,
   //       [accountId]: "✅ Login successful",
   //     }));
+  //     dispatch(fetchFBAccounts());
+  //     setLogsModalOpen(false);
   //   });
 
   //   socket.on("login-failed", ({ accountId, error }) => {
-  //     setScrapeStatus((prev) => ({
-  //       ...prev,
-  //       [accountId]: `❌ Login failed: ${error}`,
-  //     }));
-  //   });
+  //     addLog(`❌ Failed to start login for ${accountId}: ${err.message}`);
 
+  //     // addLog(`Login failed for ${accountId}: ${error}`);
+  //   });
 
   //   return () => {
   //     socket.off("scrape-started");
   //     socket.off("scrape-progress");
   //     socket.off("scrape-completed");
   //     socket.off("scrape-failed");
+  //     socket.off("login-started");
+  //     socket.off("login-completed");
+  //     socket.off("login-failed");
   //   };
-  // }, []);
-
+  // }, [dispatch]);
   useEffect(() => {
+    const socket = connectSocket();
+    setSocketInstance(socket);
+
     const addLog = (msg) =>
       setLogs((prev) => [
         ...prev,
@@ -125,35 +167,43 @@ function FacebookAccounts() {
       ]);
 
     socket.on("scrape-started", ({ accountId }) => {
+      setLogs([]);
       addLog(`Scraping started for account ${accountId}`);
     });
-
     socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-      addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
+      addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
     });
-
     socket.on("scrape-completed", ({ accountId }) => {
       addLog(`Scraping completed for account ${accountId}`);
-      setLogsModalOpen(false)
-    });
+      setLogsModalOpen(false);
 
+      disconnectSocket();
+    });
     socket.on("scrape-failed", ({ accountId, error }) => {
-      // alert('failed')
       addLog(`Scraping failed for ${accountId}: ${error}`);
+
+      disconnectSocket();
     });
 
     socket.on("login-started", ({ accountId }) => {
+       setLogs([]);
       addLog(`Login started for account ${accountId}`);
     });
-
     socket.on("login-completed", ({ accountId }) => {
-      dispatch(fetchFBAccounts());
       addLog(`Login successful for account ${accountId}`);
-      setLogsModalOpen(false)
-    });
+      setScrapeStatus((prev) => ({
+        ...prev,
+        [accountId]: "✅ Login successful",
+      }));
+      dispatch(fetchFBAccounts());
+      setLogsModalOpen(false);
 
+      disconnectSocket();
+    });
     socket.on("login-failed", ({ accountId, error }) => {
-      addLog(`Login failed for ${accountId}: ${error}`);
+      addLog(`❌ Failed to start login for ${accountId}: ${error}`);
+
+      disconnectSocket();
     });
 
     return () => {
@@ -164,27 +214,11 @@ function FacebookAccounts() {
       socket.off("login-started");
       socket.off("login-completed");
       socket.off("login-failed");
+
+      disconnectSocket();
     };
   }, [dispatch]);
 
-  // Start scraping handler
-  const handleScrape = async (accountId) => {
-    setLogsModalOpen(true)
-    try {
-      setScrapeStatus((prev) => ({
-        ...prev,
-        [accountId]: "⏳ Requesting scrape...",
-      }));
-
-      await axios.post(`http://localhost:3000/api/scrape/chats/${accountId}`);
-      //  setLogsModalOpen(false)
-    } catch (err) {
-      setScrapeStatus((prev) => ({
-        ...prev,
-        [accountId]: "❌ Error starting scrape",
-      }));
-    }
-  };
   return (
     <div className="p-6 text-gray-200 bg-gray-700">
       {/* Header */}

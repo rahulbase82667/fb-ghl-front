@@ -37,7 +37,7 @@ export const uploadFBAccounts = createAsyncThunk(
       });
       return res.data; // contains insertedCount + insertedIds
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to upload accounts");
+      return rejectWithValue(err.response?.data?.message || "Failed to upload accountsx ");
     }
   }
 );

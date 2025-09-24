@@ -10,7 +10,7 @@ function FBUploadModal({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e) => {x
     setFile(e.target.files[0]);
   };
 

@@ -7,7 +7,7 @@ import {
     fetchMessages,
     addMessage,
 } from "../redux/slices/chatsSlice";
-import { socket } from "../socket"; // 👈 import socket
+import { connectSocket, disconnectSocket, getSocket } from "../socket";
 import axios from "axios";
 import CONFIG from "../constants/config";
 import LogsModal from "../components/LogsModal";
@@ -20,6 +20,8 @@ function FBChat() {
     const [logs, setLogs] = useState([]);
     const messagesEndRef = useRef(null);
     const [scrapeStatus, setScrapeStatus] = useState({});
+      const [socketInstance, setSocketInstance] = useState(null);
+
 
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
@@ -59,6 +61,11 @@ function FBChat() {
     };
     const handleScrape = async (accountId, chatUrl) => {
         setLogsModalOpen(true)
+         if (!socketInstance || !socketInstance.connected) {
+      const socket = connectSocket();
+      setSocketInstance(socket);
+    } 
+
         try {
             setScrapeStatus((prev) => ({
                 ...prev,
@@ -79,42 +86,82 @@ function FBChat() {
     }
 };
 
-useEffect(() => {
+  // Connect socket when component mounts or when you start scraping/logging in
+  useEffect(() => {
+    const socket = connectSocket();
+    setSocketInstance(socket);
+
     const addLog = (msg) =>
-        setLogs((prev) => [
-            ...prev,
-            { message: msg, timestamp: new Date().toLocaleTimeString() },
-        ]);
+      setLogs((prev) => [
+        ...prev,
+        { message: msg, timestamp: new Date().toLocaleTimeString() },
+      ]);
 
     socket.on("scrape-started", ({ accountId }) => {
-        addLog(`Scraping started for account ${accountId}`);
+        setLogs([]);
+      addLog(`Scraping started for account ${accountId}`);
     });
-
     socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-        addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
+      addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
     });
-
     socket.on("scrape-completed", ({ accountId }) => {
-        addLog(`Scraping completed for account ${accountId}`);
-        setLogsModalOpen(false);
-        dispatch(fetchMessages(activeConversation.id)); // fetch messages
+      addLog(`Scraping completed for account ${accountId}`);
+      setLogsModalOpen(false);
+      dispatch(fetchMessages(activeConversation.id)); // fetch messages
 
+      disconnectSocket(); // disconnect on completed
     });
-
     socket.on("scrape-failed", ({ accountId, error }) => {
-        // alert('failed')
-        addLog(`Scraping failed for ${accountId}: ${error}`);
-    });
+      addLog(`Scraping failed for ${accountId}: ${error}`);
 
+      disconnectSocket(); // disconnect on failed
+    });
 
     return () => {
-        socket.off("scrape-started");
-        socket.off("scrape-progress");
-        socket.off("scrape-completed");
-        socket.off("scrape-failed");
-  
+      socket.off("scrape-started");
+      socket.off("scrape-progress");
+      socket.off("scrape-completed");
+      socket.off("scrape-failed");
+      disconnectSocket(); // cleanup on unmount
     };
-}, [dispatch,activeConversation]);
+  }, [dispatch, activeConversation]);
+
+// useEffect(() => {
+//     const addLog = (msg) =>
+//         setLogs((prev) => [
+//             ...prev,
+//             { message: msg, timestamp: new Date().toLocaleTimeString() },
+//         ]);
+
+//     socket.on("scrape-started", ({ accountId }) => {
+//         addLog(`Scraping started for account ${accountId}`);
+//     });
+
+//     socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
+//         addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
+//     });
+
+//     socket.on("scrape-completed", ({ accountId }) => {
+//         addLog(`Scraping completed for account ${accountId}`);
+//         setLogsModalOpen(false);
+//         dispatch(fetchMessages(activeConversation.id)); // fetch messages
+
+//     });
+
+//     socket.on("scrape-failed", ({ accountId, error }) => {
+//         // alert('failed')
+//         addLog(`Scraping failed for ${accountId}: ${error}`);
+//     });
+
+
+//     return () => {
+//         socket.off("scrape-started");
+//         socket.off("scrape-progress");
+//         socket.off("scrape-completed");
+//         socket.off("scrape-failed");
+  
+//     };
+// }, [dispatch,activeConversation]);
 useEffect(() => {
     scrollToBottom();
 }, [messages]);

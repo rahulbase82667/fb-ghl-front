@@ -28,8 +28,14 @@ const authSlice = createSlice({
       localStorage.removeItem(CONFIG.TOKEN_KEY);
       localStorage.removeItem("user");
     },
+      updateUser: (state, action) => {
+      // Update user data in Redux store
+      state.user = { ...state.user, ...action.payload };
+      // Persist updated user in localStorage
+      localStorage.setItem("user", JSON.stringify(state.user));
+    },
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, updateUser } = authSlice.actions;
 export default authSlice.reducer;
