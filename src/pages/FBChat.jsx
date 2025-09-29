@@ -203,7 +203,7 @@ return (
             {/* Header */}
             <div className="p-3 border-b border-gray-700 text-white font-bold">
                 {activeConversation
-                    ? <> <span>`Chat with ${activeConversation.chat_partner}`</span>
+                    ? <> <span>{activeConversation.chat_partner}</span>
                         <button
                             onClick={() => handleScrape(id, activeConversation.chat_url)}
                             className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
