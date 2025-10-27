@@ -9,11 +9,14 @@ import FBUploadModal from "../components/FBUploadModal";
 import { Link } from "react-router-dom";
 import { Trash2, Plus } from "lucide-react";
 import { connectSocket, disconnectSocket, getSocket } from "../socket";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import CONFIG from "../constants/config";
 import LogsModal from "../components/LogsModal";
+import FBAccountEditModal from "../components/FBAccountEditModal";
+
 function FacebookAccounts() {
   const { accounts, loading, error } = useSelector((state) => state.fbAccounts);
+  console.log(accounts)
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
@@ -21,12 +24,13 @@ function FacebookAccounts() {
   const [accountStatus, setAccountStatus] = useState({});
   const [logsModalOpen, setLogsModalOpen] = useState(false);
   const [logs, setLogs] = useState([]);
-
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
 
   // Track scrape status for each account
   const [scrapeStatus, setScrapeStatus] = useState({});
-    const [socketInstance, setSocketInstance] = useState(null);
-
+  const [socketInstance, setSocketInstance] = useState(null);
+  const majorErrors = ['Cookies Expired', 'Proxy Expired']
   // Handle login
   // Handle login
   const handleLogin = async (accountId) => {
@@ -42,7 +46,7 @@ function FacebookAccounts() {
         [accountId]: "⏳ Logging in...",
       }));
 
-      await axios.post(`${CONFIG.BASE_URL}/api/facebook/login/${accountId}`, {}, {
+      await axiosInstance.post(`${CONFIG.BASE_URL}/api/facebook/login/${accountId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -78,7 +82,7 @@ function FacebookAccounts() {
         [accountId]: "⏳ Requesting scrape...",
       }));
 
-      await axios.post(`http://localhost:3000/api/scrape/chats/${accountId}`);
+      await axiosInstance.post(`${CONFIG.BASE_URL}/api/scrape/chats/${accountId}`);
       //  setLogsModalOpen(false)
 
       console.log(scrapeStatus);
@@ -89,6 +93,11 @@ function FacebookAccounts() {
         [accountId]: "❌ Error starting scrape",
       }));
     }
+  };
+
+  const handleEditClick = (account) => {
+    setSelectedAccount(account);
+    setEditModalOpen(true);
   };
 
   useEffect(() => {
@@ -186,7 +195,7 @@ function FacebookAccounts() {
     });
 
     socket.on("login-started", ({ accountId }) => {
-       setLogs([]);
+      setLogs([]);
       addLog(`Login started for account ${accountId}`);
     });
     socket.on("login-completed", ({ accountId }) => {
@@ -257,14 +266,27 @@ function FacebookAccounts() {
             className="flex justify-between items-center bg-gray-900 border border-gray-800 p-4 rounded-xl shadow-md hover:shadow-lg transition-all"
           >
             <div>
-              <p className="font-semibold text-green-600">{acc.account_name || acc.email || acc.phone_number}</p>
+              <p className="font-semibold t ext-green-600">{acc.account_name || acc.email || acc.phone_number}</p>
               <p className="font-semibold text-white"><span className="text-green-700">Proxy:</span> {acc.proxy_url || 'No Proxy'}</p>
               <p className="font-semibold text-white"><span className="text-green-700">Proxy User:</span> {acc.proxy_user || 'No Proxy User'}</p>
               <p className="font-semibold text-white"><span className="text-green-700">Proxy Port:</span> {acc.proxy_port || 'N/A'}</p>
-              <p className="font-semibold text-white"><span className="text-green-700">Login Status:</span> {acc.login_status}</p>
+              <p className="font-semibold text-white"><span className="text-green-700">Login Status:</span>
+                <>
+                  {acc.login_status}
+                  {acc.login_status !== 'active' && (
+                    <span className="text-red-500"> {acc.last_error} </span>
+                  )}
+                </>
+              </p>
             </div>
+            <button
+              onClick={() => handleEditClick(acc)}
+              className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-500 active:scale-95 transition-all"
+            >
+              Edit  {acc?.last_error && majorErrors.includes(acc?.last_error) ? `(${acc?.last_error})` : ''}
+            </button>
 
-            {acc.login_status == 'active' ? (
+            {acc.login_status == 'active' && (
               <>
                 <Link to={`/fb/${acc.id}`} >
                   <button
@@ -273,34 +295,47 @@ function FacebookAccounts() {
                     View Chats
                   </button>
                 </Link>
-                <button
+              </>)
+            }
+            {/* <button
                   onClick={() => handleScrape(acc.id)}
                   className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
                 >
                   Scrape Chats
-                </button>
-                <button
-                  onClick={() => dispatch(removeFBAccount(acc.id))}
-                  className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
-                >
+                </button> */}
 
-                  <Trash2 size={16} />
-                  <span className="hidden sm:inline">Remove</span>
-                </button>
-              </>
+            {/* </>
             ) : (
-              <button
+              <> */}
+            {/* <button
                 onClick={() => handleLogin(acc.id)}
                 className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded hover:bg-green-500 active:scale-95 transition-all"
               >
                 Connect
-              </button>
-            )}
+              </button> */}
+            <button
+              onClick={() => dispatch(removeFBAccount(acc.id))}
+              className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
+            >
+
+              <Trash2 size={16} />
+              <span className="hidden sm:inline">Remove</span>
+            </button>
+            {/* </>
+            )} */}
 
 
           </li>
         ))}
       </ul>
+      <FBAccountEditModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        account={selectedAccount}
+        token={token}
+        // data={data}
+        onSuccess={() => dispatch(fetchFBAccounts())}
+      />
 
       {/* Modal */}
       {modalOpen && <FBAccountModal onClose={() => setModalOpen(false)} />}
