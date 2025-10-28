@@ -12,6 +12,7 @@ import CONFIG from "./constants/config";
 let socket;
 
 export function connectSocket() {
+  return true;
   if (!socket || !socket.connected) {
     socket = io(CONFIG.BASE_URL, {
       transports: ["websocket"],

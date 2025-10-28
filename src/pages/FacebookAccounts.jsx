@@ -16,11 +16,13 @@ import FBAccountEditModal from "../components/FBAccountEditModal";
 
 function FacebookAccounts() {
   const { accounts, loading, error } = useSelector((state) => state.fbAccounts);
-  console.log(accounts)
+  // console.log(accounts)
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
   const [accountStatus, setAccountStatus] = useState({});
   const [logsModalOpen, setLogsModalOpen] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -175,54 +177,54 @@ function FacebookAccounts() {
         { message: msg, timestamp: new Date().toLocaleTimeString() },
       ]);
 
-    socket.on("scrape-started", ({ accountId }) => {
-      setLogs([]);
-      addLog(`Scraping started for account ${accountId}`);
-    });
-    socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-      addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
-    });
-    socket.on("scrape-completed", ({ accountId }) => {
-      addLog(`Scraping completed for account ${accountId}`);
-      setLogsModalOpen(false);
+    // socket.on("scrape-started", ({ accountId }) => {
+    //   setLogs([]);
+    //   addLog(`Scraping started for account ${accountId}`);
+    // });
+    // socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
+    //   addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
+    // });
+    // socket.on("scrape-completed", ({ accountId }) => {
+    //   addLog(`Scraping completed for account ${accountId}`);
+    //   setLogsModalOpen(false);
 
-      disconnectSocket();
-    });
-    socket.on("scrape-failed", ({ accountId, error }) => {
-      addLog(`Scraping failed for ${accountId}: ${error}`);
+    //   disconnectSocket();
+    // });
+    // socket.on("scrape-failed", ({ accountId, error }) => {
+    //   addLog(`Scraping failed for ${accountId}: ${error}`);
 
-      disconnectSocket();
-    });
+    //   disconnectSocket();
+    // });
 
-    socket.on("login-started", ({ accountId }) => {
-      setLogs([]);
-      addLog(`Login started for account ${accountId}`);
-    });
-    socket.on("login-completed", ({ accountId }) => {
-      addLog(`Login successful for account ${accountId}`);
-      setScrapeStatus((prev) => ({
-        ...prev,
-        [accountId]: "✅ Login successful",
-      }));
-      dispatch(fetchFBAccounts());
-      setLogsModalOpen(false);
+    // socket.on("login-started", ({ accountId }) => {
+    //   setLogs([]);
+    //   addLog(`Login started for account ${accountId}`);
+    // });
+    // socket.on("login-completed", ({ accountId }) => {
+    //   addLog(`Login successful for account ${accountId}`);
+    //   setScrapeStatus((prev) => ({
+    //     ...prev,
+    //     [accountId]: "✅ Login successful",
+    //   }));
+    //   dispatch(fetchFBAccounts());
+    //   setLogsModalOpen(false);
 
-      disconnectSocket();
-    });
-    socket.on("login-failed", ({ accountId, error }) => {
-      addLog(`❌ Failed to start login for ${accountId}: ${error}`);
+    //   disconnectSocket();
+    // });
+    // socket.on("login-failed", ({ accountId, error }) => {
+    //   addLog(`❌ Failed to start login for ${accountId}: ${error}`);
 
-      disconnectSocket();
-    });
+    //   disconnectSocket();
+    // });
 
     return () => {
-      socket.off("scrape-started");
-      socket.off("scrape-progress");
-      socket.off("scrape-completed");
-      socket.off("scrape-failed");
-      socket.off("login-started");
-      socket.off("login-completed");
-      socket.off("login-failed");
+      // socket.off("scrape-started");
+      // socket.off("scrape-progress");
+      // socket.off("scrape-completed");
+      // socket.off("scrape-failed");
+      // socket.off("login-started");
+      // socket.off("login-completed");
+      // socket.off("login-failed");
 
       disconnectSocket();
     };
@@ -314,12 +316,23 @@ function FacebookAccounts() {
                 Connect
               </button> */}
             <button
-              onClick={() => dispatch(removeFBAccount(acc.id))}
-              className="flex items-center gap-2 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-500 active:scale-95 transition-all"
+              onClick={async () => {
+                setDeletingId(acc.id);
+                dispatch(removeFBAccount(acc.id));
+                setDeletingId(null);
+              }}
+              disabled={deletingId === acc.id}
+              className={`flex items-center gap-2 px-3 py-2 rounded text-white active:scale-95 transition-all 
+    ${deletingId === acc.id
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-500"
+                }`}
             >
 
               <Trash2 size={16} />
-              <span className="hidden sm:inline">Remove</span>
+              <span className="hidden sm:inline">
+                {deletingId === acc.id ? "Removing..." : "Remove"}
+              </span>
             </button>
             {/* </>
             )} */}

@@ -34,6 +34,7 @@ function FBChat() {
     const [messageInput, setMessageInput] = useState("");
     // Fetch conversations when entering page
     useEffect(() => {
+        
         dispatch(setActiveConversation(null)); // ⬅️ Reset on account change
         dispatch(fetchConversations(id));
     }, [id, dispatch]);
@@ -119,71 +120,34 @@ function FBChat() {
                 { message: msg, timestamp: new Date().toLocaleTimeString() },
             ]);
 
-        socket.on("scrape-started", ({ accountId }) => {
-            setLogs([]);
-            addLog(`Scraping started for account ${accountId}`);
-        });
-        socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-            addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
-        });
-        socket.on("scrape-completed", ({ accountId }) => {
-            addLog(`Scraping completed for account ${accountId}`);
-            setLogsModalOpen(false);
-            dispatch(fetchMessages(activeConversation.id)); // fetch messages
+        // socket.on("scrape-started", ({ accountId }) => {
+        //     setLogs([]);
+        //     addLog(`Scraping started for account ${accountId}`);
+        // });
+        // socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
+        //     addLog(`Scraping ${partner || "chat"} (${current}/${total}) for ${accountId}`);
+        // });
+        // socket.on("scrape-completed", ({ accountId }) => {
+        //     addLog(`Scraping completed for account ${accountId}`);
+        //     setLogsModalOpen(false);
+        //     dispatch(fetchMessages(activeConversation.id)); // fetch messages
 
-            disconnectSocket(); // disconnect on completed
-        });
-        socket.on("scrape-failed", ({ accountId, error }) => {
-            addLog(`Scraping failed for ${accountId}: ${error}`);
+        //     disconnectSocket(); // disconnect on completed
+        // });
+        // socket.on("scrape-failed", ({ accountId, error }) => {
+        //     addLog(`Scraping failed for ${accountId}: ${error}`);
 
-            disconnectSocket(); // disconnect on failed
-        });
+        //     disconnectSocket(); // disconnect on failed
+        // });
 
         return () => {
-            socket.off("scrape-started");
-            socket.off("scrape-progress");
-            socket.off("scrape-completed");
-            socket.off("scrape-failed");
+            // socket.off("scrape-started");
+            // socket.off("scrape-progress");
+            // socket.off("scrape-completed");
+            // socket.off("scrape-failed");
             disconnectSocket(); // cleanup on unmount
         };
     }, [dispatch, activeConversation]);
-
-    // useEffect(() => {
-    //     const addLog = (msg) =>
-    //         setLogs((prev) => [
-    //             ...prev,
-    //             { message: msg, timestamp: new Date().toLocaleTimeString() },
-    //         ]);
-
-    //     socket.on("scrape-started", ({ accountId }) => {
-    //         addLog(`Scraping started for account ${accountId}`);
-    //     });
-
-    //     socket.on("scrape-progress", ({ accountId, current, total, partner }) => {
-    //         addLog(`Scraping ${partner || "chat"} ( ${current}/${total}) for ${accountId}`);
-    //     });
-
-    //     socket.on("scrape-completed", ({ accountId }) => {
-    //         addLog(`Scraping completed for account ${accountId}`);
-    //         setLogsModalOpen(false);
-    //         dispatch(fetchMessages(activeConversation.id)); // fetch messages
-
-    //     });
-
-    //     socket.on("scrape-failed", ({ accountId, error }) => {
-    //         // alert('failed')
-    //         addLog(`Scraping failed for ${accountId}: ${error}`);
-    //     });
-
-
-    //     return () => {
-    //         socket.off("scrape-started");
-    //         socket.off("scrape-progress");
-    //         socket.off("scrape-completed");
-    //         socket.off("scrape-failed");
-
-    //     };
-    // }, [dispatch,activeConversation]);
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
